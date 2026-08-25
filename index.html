@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Psych Engine → DrumHit Chart Converter | Pix3l_Creat0r</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #0d0d12;
+    color: white;
+    display: flex;
+    justify-content: center;
+    padding: 25px 15px;
+}
+
+.container {
+    width: 100%;
+    max-width: 650px;
+}
+
+.card {
+    background: #17171f;
+    border: 1px solid #30303b;
+    border-radius: 18px;
+    padding: 25px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+
+h1 {
+    text-align: center;
+    margin: 0;
+    font-size: 26px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #999;
+    margin: 10px 0 25px;
+}
+
+.option {
+    margin-top: 18px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+input,
+select,
+button {
+    width: 100%;
+    padding: 13px;
+    border-radius: 9px;
+    border: 1px solid #393945;
+    font-size: 15px;
+}
+
+input,
+select {
+    background: #22222c;
+    color: white;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #7777ff;
+}
+
+.drop-zone {
+    border: 2px dashed #444452;
+    border-radius: 12px;
+    padding: 28px 15px;
+    text-align: center;
+    color: #aaa;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    border-color: #7777ff;
+    background: #20202b;
+}
+
+.drop-zone strong {
+    display: block;
+    color: white;
+    margin-bottom: 6px;
+}
+
+#fileInput {
+    display: none;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+button {
+    cursor: pointer;
+    color: white;
+    background: #292934;
+    font-weight: bold;
+}
+
+button:hover {
+    filter: brightness(1.15);
+}
+
+.convert {
+    margin-top: 22px;
+    background: #5656e8;
+    border-color: #6666ff;
+}
+
+.status {
+    margin-top: 18px;
+    padding: 13px;
+    background: #111117;
+    border-radius: 10px;
+    text-align: center;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+.footer {
+    text-align: center;
+    margin-top: 18px;
+    color: #777;
+    font-size: 13px;
+}
+
+.footer button {
+    width: auto;
+    padding: 8px 14px;
+    margin-top: 8px;
+}
+
+.footer a {
+    display: block;
+    margin-top: 10px;
+    color: #aaa;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: white;
+}
+
+.language-menu {
+    margin-top: 10px;
+}
+
+.hidden {
+    display: none;
+}
+
+@media (max-width: 500px) {
+    .card {
+        padding: 18px;
+    }
+
+    .buttons {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>Psych Engine → DrumHit Chart</h1>
+
+<div class="subtitle" id="subtitle">
+Convert Psych Engine and V-Slice charts into drum charts
+</div>
+
+<div class="option">
+
+<label id="fileLabel">
+📁 Chart
+</label>
+
+<div class="drop-zone" id="dropZone">
+
+<strong id="dropTitle">
+Drop your chart here
+</strong>
+
+<span id="dropText">
+or click to select a JSON file
+</span>
+
+</div>
+
+<input
+type="file"
+id="fileInput"
+accept=".json"
+>
+
+</div>
+
+<div class="option">
+
+<label id="chartTypeLabel">
+Chart Type
+</label>
+
+<select id="chartTypeSelect">
+
+<option value="auto">
+Automatic
+</option>
+
+<option value="psych">
+Psych Engine
+</option>
+
+<option value="vslice">
+V-Slice
+</option>
+
+</select>
+
+</div>
+
+<div class="option hidden" id="difficultyOption">
+
+<label id="difficultyLabel">
+Difficulty
+</label>
+
+<select id="difficultySelect"></select>
+
+</div>
+
+<div class="option">
+
+<label id="bpmLabel">
+BPM
+</label>
+
+<input
+type="number"
+id="bpmInput"
+value="120"
+min="1"
+step="0.01"
+placeholder="120"
+>
+
+</div>
+
+<div class="option">
+
+<label id="notesLabel">
+Notes to convert
+</label>
+
+<select id="sideSelect">
+
+<option value="player">
+Player
+</option>
+
+<option value="opponent">
+Opponent
+</option>
+
+<option value="both">
+Both
+</option>
+
+</select>
+
+</div>
+
+<button
+class="convert"
+id="convertButton"
+>
+Convert Chart
+</button>
+
+<div
+class="status"
+id="status"
+>
+Waiting for a chart...
+</div>
+
+<div class="buttons">
+
+<button id="copyButton">
+Copy JSON
+</button>
+
+<button id="downloadButton">
+Download JSON
+</button>
+
+</div>
+
+<div class="footer">
+
+<div>
+Version 2.0
+</div>
+
+<button id="languageButton">
+🌐 Language
+</button>
+
+<div
+class="language-menu hidden"
+id="languageMenu"
+>
+
+<button data-lang="en">
+English
+</button>
+
+<button data-lang="es">
+Español
+</button>
+
+</div>
+
+<a
+href="https://www.tiktok.com/@Pix3l_Creat0r"
+target="_blank"
+rel="noopener noreferrer"
+>
+TikTok: @Pix3l_Creat0r
+</a>
+
+</div>
+
+</div>
+</div>
+
+<script>
+
+const fileInput = document.getElementById("fileInput");
+const dropZone = document.getElementById("dropZone");
+const bpmInput = document.getElementById("bpmInput");
+const sideSelect = document.getElementById("sideSelect");
+const chartTypeSelect = document.getElementById("chartTypeSelect");
+const difficultyOption = document.getElementById("difficultyOption");
+const difficultySelect = document.getElementById("difficultySelect");
+const convertButton = document.getElementById("convertButton");
+const copyButton = document.getElementById("copyButton");
+const downloadButton = document.getElementById("downloadButton");
+const status = document.getElementById("status");
+const languageButton = document.getElementById("languageButton");
+const languageMenu = document.getElementById("languageMenu");
+
+let loadedChart = null;
+let generatedJSON = null;
+let currentLanguage = "en";
+let detectedChartType = null;
+
+/*
+    El estado del mensaje se guarda aquí.
+    De esta forma podemos volver a dibujarlo
+    cuando el idioma cambia.
+*/
+let statusState = {
+    type: "waiting",
+    data: {}
+};
+
+const translations = {
+
+en: {
+
+subtitle: "Convert Psych Engine and V-Slice charts into drum charts",
+
+fileLabel: "📁 Chart",
+
+dropTitle: "Drop your chart here",
+
+dropText: "or click to select a JSON file",
+
+chartTypeLabel: "Chart Type",
+
+automatic: "Automatic",
+
+psych: "Psych Engine",
+
+vslice: "V-Slice",
+
+difficultyLabel: "Difficulty",
+
+bpmLabel: "BPM",
+
+notesLabel: "Notes to convert",
+
+player: "Player",
+
+opponent: "Opponent",
+
+both: "Both",
+
+convert: "Convert Chart",
+
+waiting: "Waiting for a chart...",
+
+copy: "Copy JSON",
+
+download: "Download JSON",
+
+language: "🌐 Language",
+
+loaded: "Chart loaded successfully",
+
+converted: "Chart converted successfully",
+
+noChart: "Please select a chart first.",
+
+invalid: "Invalid JSON file.",
+
+noNotes: "No notes were found in the chart.",
+
+copied: "JSON copied to clipboard!",
+
+nothing: "Convert a chart first.",
+
+bpmDetected: "BPM detected automatically",
+
+manualBpm: "BPM was not detected. Using manual BPM.",
+
+invalidBpm: "Invalid BPM.",
+
+duplicates: "Duplicate notes removed",
+
+detectedPsych: "Psych Engine chart detected",
+
+detectedVSlice: "V-Slice chart detected",
+
+unknownType: "Chart type could not be detected. Please select it manually.",
+
+noDifficulty: "No difficulties were found.",
+
+bpmHelpVSlice:
+"V-Slice charts usually do not store the BPM in the chart file. Look for the BPM in the song's metadata.json file and enter it manually.",
+
+bpmHelpPsych:
+"The BPM was not found automatically. Check the chart JSON for a \"bpm\" value, or enter the BPM manually."
+
+},
+
+es: {
+
+subtitle: "Convierte charts de Psych Engine y V-Slice en charts de batería",
+
+fileLabel: "📁 Chart",
+
+dropTitle: "Arrastra tu chart aquí",
+
+dropText: "o haz clic para seleccionar un archivo JSON",
+
+chartTypeLabel: "Tipo de Chart",
+
+automatic: "Automático",
+
+psych: "Psych Engine",
+
+vslice: "V-Slice",
+
+difficultyLabel: "Dificultad",
+
+bpmLabel: "BPM",
+
+notesLabel: "Notas a convertir",
+
+player: "Jugador",
+
+opponent: "Oponente",
+
+both: "Ambos",
+
+convert: "Convertir Chart",
+
+waiting: "Esperando un chart...",
+
+copy: "Copiar JSON",
+
+download: "Descargar JSON",
+
+language: "🌐 Idioma",
+
+loaded: "Chart cargado correctamente",
+
+converted: "Chart convertido correctamente",
+
+noChart: "Primero selecciona un chart.",
+
+invalid: "El archivo JSON no es válido.",
+
+noNotes: "No se encontraron notas en el chart.",
+
+copied: "¡JSON copiado al portapapeles!",
+
+nothing: "Primero convierte un chart.",
+
+bpmDetected: "BPM detectado automáticamente",
+
+manualBpm: "No se pudo detectar el BPM. Usando el BPM manual.",
+
+invalidBpm: "BPM inválido.",
+
+duplicates: "Notas duplicadas eliminadas",
+
+detectedPsych: "Chart de Psych Engine detectado",
+
+detectedVSlice: "Chart de V-Slice detectado",
+
+unknownType: "No se pudo detectar el tipo de chart. Selecciónalo manualmente.",
+
+noDifficulty: "No se encontraron dificultades.",
+
+bpmHelpVSlice:
+"Los charts de V-Slice normalmente no guardan el BPM dentro del archivo del chart. Busca el BPM en el archivo metadata.json de la canción e introdúcelo manualmente.",
+
+bpmHelpPsych:
+"No se encontró el BPM automáticamente. Busca un valor \"bpm\" dentro del JSON del chart o introduce el BPM manualmente."
+
+}
+
+};
+
+function setStatus(type, data = {}) {
+
+    statusState = {
+        type: type,
+        data: data
+    };
+
+    renderStatus();
+
+}
+
+
+function renderStatus() {
+
+    const t = translations[currentLanguage];
+    const data = statusState.data;
+
+    switch (statusState.type) {
+
+        case "waiting":
+
+            status.innerHTML = t.waiting;
+
+            break;
+
+
+        case "loaded":
+
+            const typeMessage =
+                data.chartType === "vslice"
+                    ? t.detectedVSlice
+                    : t.detectedPsych;
+
+            status.innerHTML =
+                "✅ " +
+                t.loaded +
+                "<br>" +
+                typeMessage;
+
+            if (data.bpm !== null) {
+
+                status.innerHTML +=
+                    "<br>" +
+                    t.bpmDetected +
+                    ": <b>" +
+                    data.bpm +
+                    "</b>";
+
+            } else {
+
+                const bpmHelp =
+                    data.chartType === "vslice"
+                        ? t.bpmHelpVSlice
+                        : t.bpmHelpPsych;
+
+                status.innerHTML +=
+                    "<br>" +
+                    t.manualBpm +
+                    "<br><br>" +
+                    bpmHelp;
+
+            }
+
+            break;
+
+
+        case "unknown":
+
+            status.innerHTML =
+                "⚠️ " +
+                t.unknownType;
+
+            break;
+
+
+        case "invalid":
+
+            status.innerHTML =
+                "❌ " +
+                t.invalid;
+
+            break;
+
+
+        case "noChart":
+
+            status.innerHTML =
+                t.noChart;
+
+            break;
+
+
+        case "noNotes":
+
+            status.innerHTML =
+                t.noNotes;
+
+            break;
+
+
+        case "noDifficulty":
+
+            status.innerHTML =
+                t.noDifficulty;
+
+            break;
+
+
+        case "invalidBpm":
+
+            status.innerHTML =
+                t.invalidBpm;
+
+            break;
+
+
+        case "nothing":
+
+            status.innerHTML =
+                t.nothing;
+
+            break;
+
+
+        case "copied":
+
+            status.innerHTML =
+                "✅ " +
+                t.copied;
+
+            break;
+
+
+        case "converted":
+
+            let typeText =
+                data.chartType === "vslice"
+                    ? "V-Slice"
+                    : "Psych Engine";
+
+            let difficultyText = "";
+
+            if (data.chartType === "vslice") {
+
+                difficultyText =
+                    "<br>" +
+                    t.difficultyLabel +
+                    ": <b>" +
+                    data.difficulty +
+                    "</b>";
+
+            }
+
+            let extraText = "";
+
+            if (
+                data.side === "both" &&
+                data.duplicatesRemoved > 0
+            ) {
+
+                extraText =
+                    "<br>" +
+                    t.duplicates +
+                    ": <b>" +
+                    data.duplicatesRemoved +
+                    "</b>";
+
+            }
+
+            status.innerHTML =
+                "✅ " +
+                t.converted +
+                "<br>" +
+                "Type: <b>" +
+                typeText +
+                "</b>" +
+                difficultyText +
+                "<br>" +
+                "Notes: <b>" +
+                data.converted +
+                "</b><br>" +
+                "BPM: <b>" +
+                data.bpm +
+                "</b><br>" +
+                "Kit: <b>electronic_1</b>" +
+                extraText;
+
+            break;
+
+    }
+
+}
+
+
+/* =========================================================
+   IDIOMAS
+========================================================= */
+
+function applyLanguage(lang) {
+
+    currentLanguage = lang;
+
+    const t = translations[lang];
+
+    document.documentElement.lang = lang;
+
+    document.getElementById("subtitle").textContent =
+        t.subtitle;
+
+    document.getElementById("fileLabel").textContent =
+        t.fileLabel;
+
+    document.getElementById("dropTitle").textContent =
+        loadedChart
+            ? document.getElementById("dropTitle").textContent
+            : t.dropTitle;
+
+    document.getElementById("dropText").textContent =
+        t.dropText;
+
+    document.getElementById("chartTypeLabel").textContent =
+        t.chartTypeLabel;
+
+    document.getElementById("difficultyLabel").textContent =
+        t.difficultyLabel;
+
+    document.getElementById("bpmLabel").textContent =
+        t.bpmLabel;
+
+    document.getElementById("notesLabel").textContent =
+        t.notesLabel;
+
+    chartTypeSelect.options[0].text =
+        t.automatic;
+
+    chartTypeSelect.options[1].text =
+        t.psych;
+
+    chartTypeSelect.options[2].text =
+        t.vslice;
+
+    sideSelect.options[0].text =
+        t.player;
+
+    sideSelect.options[1].text =
+        t.opponent;
+
+    sideSelect.options[2].text =
+        t.both;
+
+    convertButton.textContent =
+        t.convert;
+
+    copyButton.textContent =
+        t.copy;
+
+    downloadButton.textContent =
+        t.download;
+
+    languageButton.textContent =
+        t.language;
+
+    if (loadedChart) {
+        updateDifficultyList();
+    }
+
+    /*
+        MUY IMPORTANTE:
+        Se vuelve a mostrar el mensaje actual
+        usando el nuevo idioma.
+    */
+    renderStatus();
+
+}
+
+
+applyLanguage("en");
+
+
+languageButton.addEventListener("click", function() {
+
+    languageMenu.classList.toggle("hidden");
+
+});
+
+
+document.querySelectorAll("[data-lang]").forEach(button => {
+
+    button.addEventListener("click", function() {
+
+        applyLanguage(this.dataset.lang);
+
+        languageMenu.classList.add("hidden");
+
+    });
+
+});
+
+
+/* =========================================================
+   ARCHIVOS
+========================================================= */
+
+fileInput.addEventListener("change", function() {
+
+    if (this.files.length > 0) {
+        loadFile(this.files[0]);
+    }
+
+});
+
+
+dropZone.addEventListener("click", function() {
+
+    fileInput.click();
+
+});
+
+
+dropZone.addEventListener("dragover", function(event) {
+
+    event.preventDefault();
+
+    dropZone.classList.add("dragover");
+
+});
+
+
+dropZone.addEventListener("dragleave", function() {
+
+    dropZone.classList.remove("dragover");
+
+});
+
+
+dropZone.addEventListener("drop", function(event) {
+
+    event.preventDefault();
+
+    dropZone.classList.remove("dragover");
+
+    const file = event.dataTransfer.files[0];
+
+    if (file) {
+        loadFile(file);
+    }
+
+});
+
+
+/* =========================================================
+   TIPO DE CHART
+========================================================= */
+
+chartTypeSelect.addEventListener("change", function() {
+
+    if (!loadedChart) {
+        return;
+    }
+
+    updateChartTypeInterface();
+
+});
+
+
+function detectChartType(chart) {
+
+    if (!chart || typeof chart !== "object") {
+        return null;
+    }
+
+
+    /*
+        PSYCH ENGINE
+    */
+
+    if (
+        Array.isArray(chart.notes) ||
+        (
+            chart.song &&
+            Array.isArray(chart.song.notes)
+        )
+    ) {
+
+        return "psych";
+
+    }
+
+
+    /*
+        V-SLICE
+    */
+
+    if (
+        chart.notes &&
+        typeof chart.notes === "object" &&
+        !Array.isArray(chart.notes)
+    ) {
+
+        const keys =
+            Object.keys(chart.notes);
+
+        if (
+            keys.some(key =>
+                ["easy", "normal", "hard"]
+                .includes(key.toLowerCase())
+            )
+        ) {
+
+            return "vslice";
+
+        }
+
+    }
+
+
+    if (
+        chart.scrollSpeed &&
+        chart.notes &&
+        typeof chart.notes === "object"
+    ) {
+
+        return "vslice";
+
+    }
+
+
+    return null;
+
+}
+
+
+function getPsychNotes(chart) {
+
+    if (
+        chart &&
+        Array.isArray(chart.notes)
+    ) {
+
+        return chart.notes;
+
+    }
+
+
+    if (
+        chart &&
+        chart.song &&
+        Array.isArray(chart.song.notes)
+    ) {
+
+        return chart.song.notes;
+
+    }
+
+
+    return null;
+
+}
+
+
+function getVSliceDifficulties(chart) {
+
+    if (
+        !chart ||
+        !chart.notes ||
+        typeof chart.notes !== "object" ||
+        Array.isArray(chart.notes)
+    ) {
+
+        return [];
+
+    }
+
+
+    return Object.keys(chart.notes)
+        .filter(key =>
+            Array.isArray(chart.notes[key])
+        );
+
+}
+
+
+function updateDifficultyList() {
+
+    if (!loadedChart) {
+        return;
+    }
+
+
+    const type =
+        chartTypeSelect.value === "auto"
+            ? detectedChartType
+            : chartTypeSelect.value;
+
+
+    if (type !== "vslice") {
+
+        difficultyOption.classList.add("hidden");
+
+        difficultySelect.innerHTML = "";
+
+        return;
+
+    }
+
+
+    const difficulties =
+        getVSliceDifficulties(loadedChart);
+
+
+    difficultySelect.innerHTML = "";
+
+
+    for (const difficulty of difficulties) {
+
+        const option =
+            document.createElement("option");
+
+        option.value = difficulty;
+
+        option.textContent =
+            difficulty.charAt(0).toUpperCase() +
+            difficulty.slice(1);
+
+        difficultySelect.appendChild(option);
+
+    }
+
+
+    if (difficulties.length > 0) {
+
+        difficultyOption.classList.remove("hidden");
+
+    } else {
+
+        difficultyOption.classList.add("hidden");
+
+    }
+
+}
+
+
+function updateChartTypeInterface() {
+
+    const type =
+        chartTypeSelect.value === "auto"
+            ? detectedChartType
+            : chartTypeSelect.value;
+
+
+    if (type === "vslice") {
+
+        updateDifficultyList();
+
+    } else {
+
+        difficultyOption.classList.add("hidden");
+
+    }
+
+}
+
+
+function getCurrentChartType() {
+
+    if (chartTypeSelect.value === "psych") {
+        return "psych";
+    }
+
+    if (chartTypeSelect.value === "vslice") {
+        return "vslice";
+    }
+
+    return detectedChartType;
+
+}
+
+
+/* =========================================================
+   CARGAR CHART
+========================================================= */
+
+function loadFile(file) {
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload = function(event) {
+
+        try {
+
+            loadedChart =
+                JSON.parse(event.target.result);
+
+            detectedChartType =
+                detectChartType(loadedChart);
+
+
+            document.getElementById("dropTitle")
+                .textContent = file.name;
+
+
+            if (!detectedChartType) {
+
+                chartTypeSelect.value = "auto";
+
+                difficultyOption
+                    .classList.add("hidden");
+
+                setStatus("unknown");
+
+                return;
+
+            }
+
+
+            chartTypeSelect.value =
+                detectedChartType;
+
+
+            updateChartTypeInterface();
+
+
+            const detectedBPM =
+                detectBPM(loadedChart);
+
+
+            if (detectedBPM !== null) {
+
+                bpmInput.value =
+                    detectedBPM;
+
+            }
+
+
+            setStatus("loaded", {
+
+                chartType:
+                    detectedChartType,
+
+                bpm:
+                    detectedBPM
+
+            });
+
+
+        } catch(error) {
+
+            loadedChart = null;
+
+            detectedChartType = null;
+
+            setStatus("invalid");
+
+        }
+
+    };
+
+
+    reader.readAsText(file);
+
+}
+
+
+/* =========================================================
+   DETECTAR BPM
+========================================================= */
+
+function detectBPM(chart) {
+
+    const possibleValues = [
+
+        chart.bpm,
+
+        chart.songBpm,
+
+        chart.song?.bpm,
+
+        chart.song?.songBpm,
+
+        chart.song?.song?.bpm,
+
+        chart.meta?.bpm,
+
+        chart.metadata?.bpm
+
+    ];
+
+
+    for (const value of possibleValues) {
+
+        const bpm =
+            Number(value);
+
+
+        if (
+            Number.isFinite(bpm) &&
+            bpm > 0
+        ) {
+
+            return bpm;
+
+        }
+
+    }
+
+
+    /*
+        Psych Engine sections
+    */
+
+    const notes =
+        getPsychNotes(chart);
+
+
+    if (
+        Array.isArray(notes) &&
+        notes.length > 0
+    ) {
+
+        for (const section of notes) {
+
+            if (!section) {
+                continue;
+            }
+
+
+            const bpm =
+                Number(section.bpm);
+
+
+            if (
+                Number.isFinite(bpm) &&
+                bpm > 0
+            ) {
+
+                return bpm;
+
+            }
+
+        }
+
+    }
+
+
+    /*
+        BPM changes
+    */
+
+    if (
+        Array.isArray(chart.bpmChanges) &&
+        chart.bpmChanges.length > 0
+    ) {
+
+        const bpm =
+            Number(
+                chart.bpmChanges[0].bpm
+            );
+
+
+        if (
+            Number.isFinite(bpm) &&
+            bpm > 0
+        ) {
+
+            return bpm;
+
+        }
+
+    }
+
+
+    if (
+        Array.isArray(chart.song?.bpmChanges) &&
+        chart.song.bpmChanges.length > 0
+    ) {
+
+        const bpm =
+            Number(
+                chart.song.bpmChanges[0].bpm
+            );
+
+
+        if (
+            Number.isFinite(bpm) &&
+            bpm > 0
+        ) {
+
+            return bpm;
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================================
+   CONVERSIÓN PSYCH ENGINE
+========================================================= */
+
+function convertPsychChart(
+    sections,
+    selectedSide,
+    output
+) {
+
+    let converted = 0;
+
+    let duplicatesRemoved = 0;
+
+    const uniqueNotes =
+        new Set();
+
+
+    for (const section of sections) {
+
+        if (
+            !section ||
+            !Array.isArray(section.sectionNotes)
+        ) {
+
+            continue;
+
+        }
+
+
+        for (const note of section.sectionNotes) {
+
+            if (!Array.isArray(note)) {
+                continue;
+            }
+
+
+            const strumTime =
+                Number(note[0]);
+
+            const noteData =
+                Number(note[1]);
+
+
+            if (
+                !Number.isFinite(strumTime) ||
+                !Number.isFinite(noteData)
+            ) {
+
+                continue;
+
+            }
+
+
+            /*
+                Psych Engine:
+
+                noteData 0-3 = lado base
+                noteData 4-7 = lado opuesto
+
+                mustHitSection cambia qué lado
+                corresponde al jugador.
+            */
+
+            let isPlayer =
+                noteData >= 4;
+
+
+            if (section.mustHitSection === true) {
+
+                isPlayer = !isPlayer;
+
+            }
+
+
+            let shouldConvert = false;
+
+
+            if (selectedSide === "both") {
+
+                shouldConvert = true;
+
+            } else if (
+                selectedSide === "player" &&
+                isPlayer
+            ) {
+
+                shouldConvert = true;
+
+            } else if (
+                selectedSide === "opponent" &&
+                !isPlayer
+            ) {
+
+                shouldConvert = true;
+
+            }
+
+
+            if (!shouldConvert) {
+                continue;
+            }
+
+
+            const lane =
+                ((noteData % 4) + 4) % 4;
+
+
+            const time =
+                Number(
+                    (strumTime / 1000)
+                    .toFixed(6)
+                );
+
+
+            const duplicateKey =
+                time + "|" + lane;
+
+
+            if (
+                selectedSide === "both" &&
+                uniqueNotes.has(duplicateKey)
+            ) {
+
+                duplicatesRemoved++;
+
+                continue;
+
+            }
+
+
+            uniqueNotes.add(
+                duplicateKey
+            );
+
+
+            output.notes.push({
+
+                t: time,
+
+                l: lane,
+
+                s: "kick"
+
+            });
+
+
+            converted++;
+
+        }
+
+    }
+
+
+    return {
+
+        converted,
+
+        duplicatesRemoved
+
+    };
+
+}
+
+
+/* =========================================================
+   CONVERSIÓN V-SLICE
+========================================================= */
+
+function convertVSliceChart(
+    notes,
+    selectedSide,
+    output
+) {
+
+    let converted = 0;
+
+    let duplicatesRemoved = 0;
+
+    const uniqueNotes =
+        new Set();
+
+
+    for (const note of notes) {
+
+        if (
+            !note ||
+            typeof note !== "object"
+        ) {
+
+            continue;
+
+        }
+
+
+        const strumTime =
+            Number(note.t);
+
+        const noteData =
+            Number(note.d);
+
+
+        if (
+            !Number.isFinite(strumTime) ||
+            !Number.isFinite(noteData)
+        ) {
+
+            continue;
+
+        }
+
+
+        if (
+            noteData < 0 ||
+            noteData > 7
+        ) {
+
+            continue;
+
+        }
+
+
+        /*
+            V-Slice:
+
+            0-3 = Player
+            4-7 = Opponent
+
+            Esta es la parte corregida.
+        */
+
+        const isPlayer =
+            noteData >= 0 &&
+            noteData <= 3;
+
+
+        const isOpponent =
+            noteData >= 4 &&
+            noteData <= 7;
+
+
+        let shouldConvert = false;
+
+
+        if (selectedSide === "both") {
+
+            shouldConvert = true;
+
+        } else if (
+            selectedSide === "player" &&
+            isPlayer
+        ) {
+
+            shouldConvert = true;
+
+        } else if (
+            selectedSide === "opponent" &&
+            isOpponent
+        ) {
+
+            shouldConvert = true;
+
+        }
+
+
+        if (!shouldConvert) {
+            continue;
+        }
+
+
+        const lane =
+            ((noteData % 4) + 4) % 4;
+
+
+        const time =
+            Number(
+                (strumTime / 1000)
+                .toFixed(6)
+            );
+
+
+        const duplicateKey =
+            time + "|" + lane;
+
+
+        if (
+            selectedSide === "both" &&
+            uniqueNotes.has(duplicateKey)
+        ) {
+
+            duplicatesRemoved++;
+
+            continue;
+
+        }
+
+
+        uniqueNotes.add(
+            duplicateKey
+        );
+
+
+        output.notes.push({
+
+            t: time,
+
+            l: lane,
+
+            s: "kick"
+
+        });
+
+
+        converted++;
+
+    }
+
+
+    return {
+
+        converted,
+
+        duplicatesRemoved
+
+    };
+
+}
+
+
+/* =========================================================
+   CONVERTIR
+========================================================= */
+
+convertButton.addEventListener(
+    "click",
+    function() {
+
+        if (!loadedChart) {
+
+            setStatus("noChart");
+
+            return;
+
+        }
+
+
+        const bpm =
+            Number(bpmInput.value);
+
+
+        if (
+            !Number.isFinite(bpm) ||
+            bpm <= 0
+        ) {
+
+            setStatus("invalidBpm");
+
+            return;
+
+        }
+
+
+        const chartType =
+            getCurrentChartType();
+
+
+        if (!chartType) {
+
+            setStatus("unknown");
+
+            return;
+
+        }
+
+
+        if (chartType === "vslice") {
+
+            const difficulties =
+                getVSliceDifficulties(
+                    loadedChart
+                );
+
+
+            if (
+                difficulties.length === 0
+            ) {
+
+                setStatus(
+                    "noDifficulty"
+                );
+
+                return;
+
+            }
+
+
+            if (!difficultySelect.value) {
+
+                setStatus(
+                    "noDifficulty"
+                );
+
+                return;
+
+            }
+
+        }
+
+
+        const output = {
+
+            version: 1,
+
+            base_bpm: bpm,
+
+            guide: "quarter",
+
+            beats_per_bar: 4,
+
+            beat_unit: 4,
+
+            lane_count: 4,
+
+            kit: "electronic_1",
+
+            vol_click: 0,
+
+            vol_sfx: 0,
+
+            vol_bgm: 1.0,
+
+            notes: [],
+
+            bpms: [
+
+                {
+
+                    time: 0.0,
+
+                    bpm: bpm
+
+                }
+
+            ],
+
+            bgm: 0.0
+
+        };
+
+
+        let result;
+
+
+        if (chartType === "psych") {
+
+            const sections =
+                getPsychNotes(
+                    loadedChart
+                );
+
+
+            if (!sections) {
+
+                setStatus(
+                    "noNotes"
+                );
+
+                return;
+
+            }
+
+
+            result =
+                convertPsychChart(
+                    sections,
+                    sideSelect.value,
+                    output
+                );
+
+
+        } else {
+
+            const difficulty =
+                difficultySelect.value;
+
+
+            const notes =
+                loadedChart
+                    .notes[difficulty];
+
+
+            if (
+                !Array.isArray(notes)
+            ) {
+
+                setStatus(
+                    "noNotes"
+                );
+
+                return;
+
+            }
+
+
+            result =
+                convertVSliceChart(
+                    notes,
+                    sideSelect.value,
+                    output
+                );
+
+        }
+
+
+        output.notes.sort(
+            function(a, b) {
+
+                if (a.t !== b.t) {
+
+                    return a.t - b.t;
+
+                }
+
+                return a.l - b.l;
+
+            }
+        );
+
+
+        generatedJSON =
+            JSON.stringify(
+                output,
+                null,
+                2
+            );
+
+
+        setStatus(
+            "converted",
+            {
+
+                chartType:
+                    chartType,
+
+                difficulty:
+                    chartType === "vslice"
+                        ? difficultySelect.value
+                        : null,
+
+                converted:
+                    result.converted,
+
+                duplicatesRemoved:
+                    result.duplicatesRemoved,
+
+                bpm:
+                    bpm,
+
+                side:
+                    sideSelect.value
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   COPIAR
+========================================================= */
+
+copyButton.addEventListener(
+    "click",
+    async function() {
+
+        if (!generatedJSON) {
+
+            setStatus("nothing");
+
+            return;
+
+        }
+
+
+        try {
+
+            await navigator.clipboard
+                .writeText(
+                    generatedJSON
+                );
+
+
+            setStatus("copied");
+
+
+        } catch(error) {
+
+            const textarea =
+                document.createElement(
+                    "textarea"
+                );
+
+
+            textarea.value =
+                generatedJSON;
+
+
+            document.body.appendChild(
+                textarea
+            );
+
+
+            textarea.select();
+
+
+            document.execCommand(
+                "copy"
+            );
+
+
+            document.body.removeChild(
+                textarea
+            );
+
+
+            setStatus("copied");
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   DESCARGAR
+========================================================= */
+
+downloadButton.addEventListener(
+    "click",
+    function() {
+
+        if (!generatedJSON) {
+
+            setStatus("nothing");
+
+            return;
+
+        }
+
+
+        const blob =
+            new Blob(
+                [
+                    generatedJSON
+                ],
+                {
+                    type:
+                        "application/json"
+                }
+            );
+
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+
+        const link =
+            document.createElement(
+                "a"
+            );
+
+
+        link.href = url;
+
+        link.download =
+            "chart.json";
+
+
+        document.body.appendChild(
+            link
+        );
+
+
+        link.click();
+
+
+        document.body.removeChild(
+            link
+        );
+
+
+        setTimeout(
+            function() {
+
+                URL.revokeObjectURL(
+                    url
+                );
+
+            },
+            1000
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
